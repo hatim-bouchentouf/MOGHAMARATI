@@ -1,0 +1,30 @@
+.map {
+  background-color: rgb(116, 207, 207);
+}
+
+.map__title {
+  text-align: center;
+}
+
+.popup {
+  max-width: 400px;
+}
+.popup img {
+  height: 200px;
+  width: auto;
+  text-align: center;
+  margin: 0 auto;
+  display: block;
+}
+.error {
+  color: #f05305;
+}
+.entry__form label,
+.entry__form input,
+.entry__form textarea,
+.entry__form button {
+  font-size: 1rem;
+  margin: 0.5rem 0;
+  display: block;
+  width: 100%;
+}
