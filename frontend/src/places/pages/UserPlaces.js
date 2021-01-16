@@ -18,8 +18,8 @@ const PLACES = [
   },
   {
     id: "u2",
-    title: "kenitra",
-    description: "kizafthhhhhhhhhhhhhhhhhhhhhhh",
+    title: "rabat",
+    description: "nadia",
     imageURL:
       "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%3Fid%3DOIP.qFaZWxhzLVu8CT9HrZ2IhQHaE8%26pid%3DApi&f=1",
     address: "khabazat",

@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 import Card from "../../shared/components/UIElements/Card";
 import PlaceItem from "./PlaceItem";
@@ -10,7 +11,9 @@ const PlaceList = (props) => {
       <div className="noplace-list">
         <Card>
           <h2>No places Found. Maybe create One ?</h2>
-          <button>Share Place</button>
+          <Link to="/places/new">
+            <button>Share Place</button>
+          </Link>
         </Card>
       </div>
     );
