@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useCallback } from "react";
 import {
   BrowserRouter as Router,
   Switch,
@@ -12,15 +12,31 @@ import UserPlaces from "./places/pages/UserPlaces";
 import NewPlace from "./places/pages/NewPlace";
 import UpdatePlace from "./places/pages/UpdatePlace";
 import Auth from "./users/pages/Auth";
+import { AuthContext } from "./shared/context/auth-context";
 
 const App = () => {
-  return (
-    <Router>
-      <Switch>
-        <Route exact path="/" component={HomePage} />
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const login = useCallback(() => {
+    setIsLoggedIn(true);
+  }, []);
+
+  const logout = useCallback(() => {
+    setIsLoggedIn(false);
+  }, []);
+
+  let routes;
+
+  if (isLoggedIn) {
+    routes = (
+      <>
         <Route exact path="/users">
           <MainNavigation />
           <Users />
+        </Route>
+        <Route exact path="/:userId/places">
+          <MainNavigation />
+          <UserPlaces />
         </Route>
         <Route exact path="/places/new">
           <MainNavigation />
@@ -30,6 +46,16 @@ const App = () => {
           <MainNavigation />
           <UpdatePlace />
         </Route>
+        <Redirect to="/users" />
+      </>
+    );
+  } else {
+    routes = (
+      <>
+        <Route exact path="/users">
+          <MainNavigation />
+          <Users />
+        </Route>
         <Route exact path="/:userId/places">
           <MainNavigation />
           <UserPlaces />
@@ -38,9 +64,22 @@ const App = () => {
           <MainNavigation />
           <Auth />
         </Route>
-        <Redirect to="/" />
-      </Switch>
-    </Router>
+        <Redirect to="/auth" />
+      </>
+    );
+  }
+
+  return (
+    <AuthContext.Provider
+      value={{ isLoggedIn: isLoggedIn, login: login, logout: logout }}
+    >
+      <Router>
+        <Switch>
+          <Route exact path="/" component={HomePage} />
+          {routes}
+        </Switch>
+      </Router>
+    </AuthContext.Provider>
   );
 };
 export default App;

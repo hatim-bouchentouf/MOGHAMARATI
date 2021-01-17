@@ -11,17 +11,16 @@ import "./PlaceForm.css";
 const NewPlace = () => {
   const [formState, inputHandler] = useForm(
     {
-      inputs: {
-        title: { value: "", isValid: false },
-        description: {
-          value: "",
-          isValid: false,
-        },
-        address: {
-          value: "",
-          isVald: false,
-        },
+      title: { value: "", isValid: false },
+      description: {
+        value: "",
+        isValid: false,
       },
+      address: {
+        value: "",
+        isVald: false,
+      },
+
       isValid: false,
     },
     false
@@ -31,7 +30,7 @@ const NewPlace = () => {
     e.preventDefault();
     console.log(formState.inputs);
   };
-
+  console.log(formState.isValid);
   return (
     <form className="place-form" onSubmit={placeSubmitHandler}>
       <Input
