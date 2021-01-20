@@ -4,6 +4,7 @@ const helmet = require("helmet");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const placesRoutes = require("./routes/places-routes");
+const usersRoutes = require("./routes/users-routes");
 
 require("dotenv").config();
 
@@ -21,7 +22,8 @@ app.use(
 
 app.use(express.json());
 
-app.use(placesRoutes);
+app.use("/api/places", placesRoutes);
+app.use("/api/users", usersRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
