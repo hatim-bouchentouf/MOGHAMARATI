@@ -1,3 +1,5 @@
+const { validationResult } = require("express-validator");
+
 const USERS = [
   {
     id: "u1",
@@ -13,11 +15,17 @@ const getUsers = (req, res, next) => {
 
 const signUp = (req, res, next) => {
   const { id, name, email, password } = req.body;
+  const errors = validationResult(req);
 
+  if (!errors.isEmpty()) {
+    return res
+      .status(422)
+      .json({ message: "Invalid inputs passed, please check your data." });
+  }
   const hasUser = USERS.find((u) => u.email === email);
 
   if (hasUser) {
-    res
+    return res
       .status(401)
       .send({ message: "Could not create user, email already exists." });
   }
@@ -36,7 +44,7 @@ const login = (req, res, next) => {
 
   const identifiedUser = USERS.find((u) => u.email === email);
   if (!identifiedUser || identifiedUser.password !== password) {
-    res.status(401).send({
+    return res.status(401).send({
       message: "Could not identify user, credentials seem to be wrong.",
     });
   }

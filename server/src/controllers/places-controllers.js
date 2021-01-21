@@ -1,3 +1,5 @@
+const { validationResult } = require("express-validator");
+
 let PLACES = [
   {
     id: "p1",
@@ -20,7 +22,7 @@ const getPlaceById = (req, res, next) => {
   });
 
   if (!place) {
-    next();
+    return next();
   }
   res.json({ place });
 };
@@ -33,12 +35,19 @@ const getPlacesByUserId = (req, res, next) => {
   });
 
   if (!places || places.length === 0) {
-    next();
+    return next();
   }
   res.json({ places });
 };
 
 const createPlace = (req, res, next) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res
+      .status(422)
+      .json({ message: "Invalid inputs passed, please check your data." });
+  }
   const { id, title, description, coordinates, address, creator } = req.body;
 
   const createdPlace = {
@@ -57,6 +66,13 @@ const createPlace = (req, res, next) => {
 
 const updatePlace = (req, res, next) => {
   const { title, description } = req.body;
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res
+      .status(422)
+      .json({ message: "Invalid inputs passed, please check your data." });
+  }
   const placeId = req.params.pid;
 
   const updatedPlace = { ...PLACES.find((p) => p.id === placeId) };
@@ -72,6 +88,9 @@ const updatePlace = (req, res, next) => {
 
 const deletePlace = (req, res, next) => {
   const placeId = req.params.pid;
+  if (!PLACES.find((p) => p.id === placeId)) {
+    return next();
+  }
   PLACES = PLACES.filter((p) => p.id !== placeId);
   res.status(200).json({ message: "Deleted place." });
 };
