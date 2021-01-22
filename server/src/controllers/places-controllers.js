@@ -1,4 +1,5 @@
 const { validationResult } = require("express-validator");
+const getAddressLocation = require("../util/location");
 
 let PLACES = [
   {
@@ -40,7 +41,7 @@ const getPlacesByUserId = (req, res, next) => {
   res.json({ places });
 };
 
-const createPlace = (req, res, next) => {
+const createPlace = async (req, res, next) => {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
@@ -48,7 +49,15 @@ const createPlace = (req, res, next) => {
       .status(422)
       .json({ message: "Invalid inputs passed, please check your data." });
   }
-  const { id, title, description, coordinates, address, creator } = req.body;
+  const { id, title, description, address, creator } = req.body;
+
+  let coordinates;
+
+  try {
+    coordinates = await getAddressLocation(address);
+  } catch (error) {
+    return next(error);
+  }
 
   const createdPlace = {
     id,
