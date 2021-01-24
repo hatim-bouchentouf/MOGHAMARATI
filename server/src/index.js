@@ -29,7 +29,15 @@ app.use(notFound);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
+const DATABASE_URL = process.env.DATABASE_URL;
 
-app.listen(PORT, () => {
-  console.log(`server is running on port ${PORT}`);
-});
+mongoose
+  .connect(DATABASE_URL, { useUnifiedTopology: true, useNewUrlParser: true })
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`server is running on port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.log(err);
+  });

@@ -1,52 +1,73 @@
 const { validationResult } = require("express-validator");
+const User = require("../models/userSchema");
 
-const USERS = [
-  {
-    id: "u1",
-    name: "chanko",
-    email: "chanko@gmail.com",
-    password: "hatim",
-  },
-];
-
-const getUsers = (req, res, next) => {
-  res.json({ users: USERS });
+const getUsers = async (req, res, next) => {
+  let users;
+  try {
+    users = await User.find({}, "-password");
+  } catch (error) {
+    return res.status(422).json({ message: "Fetching users failed !!!" });
+  }
+  res.json({ users: users.map((user) => user.toObject({ getters: true })) });
 };
 
-const signUp = (req, res, next) => {
-  const { id, name, email, password } = req.body;
+const signUp = async (req, res, next) => {
+  const { name, email, password } = req.body;
   const errors = validationResult(req);
-
   if (!errors.isEmpty()) {
     return res
       .status(422)
       .json({ message: "Invalid inputs passed, please check your data." });
   }
-  const hasUser = USERS.find((u) => u.email === email);
 
-  if (hasUser) {
+  let existingUser;
+
+  try {
+    existingUser = await User.findOne({ email: email });
+  } catch (err) {
     return res
-      .status(401)
-      .send({ message: "Could not create user, email already exists." });
+      .status(422)
+      .json({ message: "Signing up failed, please try again later" });
   }
-  const createUser = {
-    id,
+
+  if (existingUser) {
+    return res.status(422).json({ message: "User exists already !!!" });
+  }
+
+  const createdUser = new User({
     name,
     email,
+    image: "hello",
     password,
-  };
-  USERS.push(createUser);
-  res.status(201).json({ user: createUser });
+    places: [],
+  });
+
+  try {
+    await createdUser.save();
+  } catch (error) {
+    return next(error);
+  }
+
+  res.status(201).json({ user: createdUser.toObject({ getters: true }) });
 };
 
-const login = (req, res, next) => {
+const login = async (req, res, next) => {
   const { email, password } = req.body;
 
-  const identifiedUser = USERS.find((u) => u.email === email);
-  if (!identifiedUser || identifiedUser.password !== password) {
-    return res.status(401).send({
-      message: "Could not identify user, credentials seem to be wrong.",
-    });
+  let existingUser;
+
+  try {
+    existingUser = await User.findOne({ email: email });
+  } catch (err) {
+    return res
+      .status(422)
+      .json({ message: "login failed, please try again later" });
+  }
+
+  if (!existingUser || existingUser.password !== password) {
+    return res
+      .status(401)
+      .json({ message: "Invalid credentials, could not log you in!!!" });
   }
   res.json({ message: "Logged in!" });
 };
