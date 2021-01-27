@@ -6,7 +6,11 @@ import "./PlaceItem.css";
 import Map from "../../shared/components/UIElements/Map";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../../shared/context/auth-context";
+import useHttpClient from "../../shared/hooks/http-hook";
+import ErrorModal from "../../shared/components/UIElements/ErrorModal";
+import LoadingSpinner from "../../shared/components/UIElements/LoadingSpinner";
 const PlaceItem = (props) => {
+  const { isLoading, error, sendRequest, clearError } = useHttpClient();
   const auth = useContext(AuthContext);
   const [showMap, setShowMap] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -16,13 +20,20 @@ const PlaceItem = (props) => {
   const cancelDeleteHandler = () => {
     setShowConfirmModal(false);
   };
-  const ConfirmDeleteHandler = () => {
-    console.log("Deleted");
+  const ConfirmDeleteHandler = async () => {
     setShowConfirmModal(false);
+    try {
+      await sendRequest(
+        `http://localhost:5000/api/places/${props.id}`,
+        "DELETE"
+      );
+      props.onDelete(props.id);
+    } catch (err) {}
   };
 
   return (
     <>
+      <ErrorModal error={error} onClear={clearError} />
       <Modal
         show={showMap}
         onCancel={closeMapHandler}
@@ -51,6 +62,7 @@ const PlaceItem = (props) => {
       </Modal>
       <div className="place-item">
         <Card className="place-item__content">
+          {isLoading && <LoadingSpinner asOverlay />}
           <div className="place-item__image">
             <img src={props.image} alt={props.title} />
           </div>
@@ -61,12 +73,12 @@ const PlaceItem = (props) => {
           </div>
           <div className="place-item__actions">
             <button onClick={openMapHandler}>VIEW ON MAP</button>
-            {auth.isLoggedIn && (
+            {auth.userId === props.creatorId && (
               <Link to={`/places/${props.id}`}>
                 <button>EDIT</button>
               </Link>
             )}
-            {auth.isLoggedIn && (
+            {auth.userId === props.creatorId && (
               <button onClick={showDeleteWarningHandler}>DELETE</button>
             )}
           </div>

@@ -1,7 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import React, { useContext, useEffect, useState } from "react";
+import { useHistory, useParams } from "react-router-dom";
 import Input from "../../shared/components/FormElements/Input";
+import Card from "../../shared/components/UIElements/Card";
+import ErrorModal from "../../shared/components/UIElements/ErrorModal";
+import LoadingSpinner from "../../shared/components/UIElements/LoadingSpinner";
+import { AuthContext } from "../../shared/context/auth-context";
 import { useForm } from "../../shared/hooks/form-hook";
+import useHttpClient from "../../shared/hooks/http-hook";
 import {
   VALIDATOR_MINLENGTH,
   VALIDATOR_REQUIRE,
@@ -9,37 +14,12 @@ import {
 
 import "./PlaceForm.css";
 
-const PLACES = [
-  {
-    id: "u1",
-    title: "kenitra",
-    description: "kizafthhhhhhhhhhhhhhhhhhhh",
-    imageURL:
-      "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%3Fid%3DOIP.qFaZWxhzLVu8CT9HrZ2IhQHaE8%26pid%3DApi&f=1",
-    address: "khabazat",
-    location: {
-      latitude: 34.01,
-      longitude: -6.83,
-    },
-    creator: "u1",
-  },
-  {
-    id: "u2",
-    title: "rabat",
-    description: "nadiaaa",
-    imageURL:
-      "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%3Fid%3DOIP.qFaZWxhzLVu8CT9HrZ2IhQHaE8%26pid%3DApi&f=1",
-    address: "khabazat",
-    location: {
-      latitude: 34.01,
-      longitude: -6.83,
-    },
-    creator: "u2",
-  },
-];
 const UpdatePlace = () => {
-  const [isLoading, setIsLoading] = useState(true);
+  const auth = useContext(AuthContext);
+  const { isLoading, error, sendRequest, clearError } = useHttpClient();
+  const [loadedPlace, setLoadedPlace] = useState();
   const placeId = useParams().placeId;
+  const history = useHistory();
 
   const [formState, inputHandler, setFormData] = useForm(
     {
@@ -54,72 +34,99 @@ const UpdatePlace = () => {
     },
     false
   );
-  const identifiedPlace = PLACES.find((p) => p.id === placeId);
 
   useEffect(() => {
-    setFormData(
-      {
-        title: {
-          value: identifiedPlace?.title,
-          isValid: true,
-        },
-        description: {
-          value: identifiedPlace?.description,
-          isValid: true,
-        },
-      },
-      true
-    );
-    setIsLoading(false);
-  }, [setFormData, identifiedPlace]);
+    const fetchPlace = async () => {
+      try {
+        const responseData = await sendRequest(
+          `http://localhost:5000/api/places/${placeId}`
+        );
+        setLoadedPlace(responseData.place);
+        setFormData(
+          {
+            title: {
+              value: responseData.place?.title,
+              isValid: true,
+            },
+            description: {
+              value: responseData.place?.description,
+              isValid: true,
+            },
+          },
+          true
+        );
+      } catch (err) {}
+    };
+    fetchPlace();
+  }, [sendRequest, placeId, setFormData]);
 
-  const placeUpdateSubmitHandler = (e) => {
+  const placeUpdateSubmitHandler = async (e) => {
     e.preventDefault();
-    console.log(formState.inputs);
+    try {
+      await sendRequest(
+        `http://localhost:5000/api/places/${placeId}`,
+        "PATCH",
+        JSON.stringify({
+          title: formState.inputs.title.value,
+          description: formState.inputs.description.value,
+        }),
+        {
+          "Content-Type": "application/json",
+        }
+      );
+      history.push("/" + auth.userId + "/places");
+    } catch (error) {}
   };
 
-  if (!identifiedPlace) {
-    return (
-      <div className="noplace-list">
-        <h2>Could not find place!</h2>
-      </div>
-    );
-  }
   if (isLoading) {
     return (
       <div className="center">
-        <h2>Loading...</h2>
+        <LoadingSpinner asOverlay />
       </div>
     );
   }
+
+  if (!loadedPlace && !error) {
+    return (
+      <div className="center">
+        <Card>
+          <h2>Could not find place!</h2>
+        </Card>
+      </div>
+    );
+  }
+
   return (
-    <form className="place-form" onSubmit={placeUpdateSubmitHandler}>
-      <Input
-        id="title"
-        element="input"
-        type="text"
-        label="Title"
-        validators={[VALIDATOR_REQUIRE()]}
-        errorText="Please enter a valid title"
-        onInput={inputHandler}
-        initialValue={formState.inputs.title.value}
-        initialValid={formState.inputs.title.isValid}
-      />
-      <Input
-        id="description"
-        element="input"
-        type="text"
-        label="description"
-        validators={[VALIDATOR_MINLENGTH(6)]}
-        errorText="Please enter a valid description (min 5 characters)"
-        onInput={inputHandler}
-        initialValue={formState.inputs.description.value}
-        initialValid={formState.inputs.description.isValid}
-      />
-      <button type="submit" disabled={!formState.isValid}>
-        Update Place
-      </button>
-    </form>
+    <>
+      <ErrorModal error={error} onClear={clearError} />
+      <form className="place-form" onSubmit={placeUpdateSubmitHandler}>
+        <Input
+          id="title"
+          element="input"
+          type="text"
+          label="Title"
+          validators={[VALIDATOR_REQUIRE()]}
+          errorText="Please enter a valid title"
+          onInput={inputHandler}
+          initialValue={loadedPlace?.title}
+          initialValid={true}
+        />
+        <Input
+          id="description"
+          element="input"
+          type="text"
+          label="description"
+          validators={[VALIDATOR_MINLENGTH(6)]}
+          errorText="Please enter a valid description (min 5 characters)"
+          onInput={inputHandler}
+          initialValue={loadedPlace?.description}
+          initialValid={true}
+        />
+        <button type="submit" disabled={!formState.isValid}>
+          Update Place
+        </button>
+      </form>
+    </>
   );
 };
 

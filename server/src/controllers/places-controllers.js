@@ -52,7 +52,7 @@ const createPlace = async (req, res, next) => {
       .status(422)
       .json({ message: "Invalid inputs passed, please check your data." });
   }
-  const { id, title, description, address, creator } = req.body;
+  const { title, description, address, creator } = req.body;
 
   let coordinates;
 

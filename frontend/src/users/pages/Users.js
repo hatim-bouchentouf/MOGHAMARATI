@@ -1,34 +1,36 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import ErrorModal from "../../shared/components/UIElements/ErrorModal";
+import LoadingSpinner from "../../shared/components/UIElements/LoadingSpinner";
+import useHttpClient from "../../shared/hooks/http-hook";
 import UserList from "../components/UserList";
 
 function Users() {
-  const User = [
-    {
-      id: "u1",
-      name: "chanko",
-      image:
-        "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%3Fid%3DOIP.rFK6PyNnOcoGsvxeejP17gHaD4%26pid%3DApi&f=1",
-      places: 3,
-    },
-    {
-      id: "u2",
-      name: "chanko",
-      image:
-        "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%3Fid%3DOIP.rFK6PyNnOcoGsvxeejP17gHaD4%26pid%3DApi&f=1",
-      places: 3,
-    },
-    {
-      id: "u3",
-      name: "chanko",
-      image:
-        "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%3Fid%3DOIP.rFK6PyNnOcoGsvxeejP17gHaD4%26pid%3DApi&f=1",
-      places: 3,
-    },
-  ];
+  const { isLoading, error, sendRequest, clearError } = useHttpClient();
+  const [loadedUsers, setLoadedUsers] = useState([]);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const responseData = await sendRequest(
+          "http://localhost:5000/api/users"
+        );
+
+        setLoadedUsers(responseData.users);
+      } catch (err) {}
+    };
+    fetchUsers();
+  }, [sendRequest]);
+
   return (
-    <div>
-      <UserList items={User} />
-    </div>
+    <>
+      <ErrorModal error={error} onClear={clearError} />
+      {isLoading && (
+        <div className="center">
+          <LoadingSpinner asOverlay />
+        </div>
+      )}
+      <UserList items={loadedUsers} />
+    </>
   );
 }
 

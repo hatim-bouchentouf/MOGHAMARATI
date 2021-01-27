@@ -31,7 +31,7 @@ const signUp = async (req, res, next) => {
   }
 
   if (existingUser) {
-    return res.status(422).json({ message: "User exists already !!!" });
+    return res.status(422).json({ message: "User already exists !!!" });
   }
 
   const createdUser = new User({
@@ -69,7 +69,10 @@ const login = async (req, res, next) => {
       .status(401)
       .json({ message: "Invalid credentials, could not log you in!!!" });
   }
-  res.json({ message: "Logged in!" });
+  res.json({
+    message: "Logged in!",
+    user: existingUser.toObject({ getters: true }),
+  });
 };
 exports.getUsers = getUsers;
 exports.signup = signUp;

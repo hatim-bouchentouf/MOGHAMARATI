@@ -2,7 +2,7 @@ import React from "react";
 import "./HomePage.css";
 import vid from "../../mp4/smoke.mp4";
 import { Link } from "react-router-dom";
-import Moghamarati from "../../shared/components/UIElements/Moghamarati";
+
 function HomePage() {
   return (
     <section className="home" id="home">
