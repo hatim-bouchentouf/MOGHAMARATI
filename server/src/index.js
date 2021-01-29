@@ -1,3 +1,5 @@
+const fs = require("fs");
+const path = require("path");
 const express = require("express");
 const morgan = require("morgan");
 const helmet = require("helmet");
@@ -8,12 +10,13 @@ const usersRoutes = require("./routes/users-routes");
 
 require("dotenv").config();
 
-const { notFound, errorHandler } = require("./middlewares");
+const { notFound, errorHandler } = require("./middleware/middlewares");
 
 const app = express();
 
 app.use(morgan("common"));
 app.use(helmet());
+
 app.use(
   cors({
     origin: process.env.CORS_ORIGIN,
@@ -22,9 +25,30 @@ app.use(
 
 app.use(express.json());
 
+app.use(
+  "/src/uploads/images",
+  express.static(path.join(__dirname, "uploads", "images"))
+);
+
+// midd Routes
+
 app.use("/api/places", placesRoutes);
 app.use("/api/users", usersRoutes);
 
+// midd error
+
+app.use((error, req, res, next) => {
+  if (req.file) {
+    fs.unlink(req.file.path, (err) => {
+      console.log(err);
+    });
+  }
+  if (res.headerSent) {
+    return next(error);
+  }
+  res.status(error.code || 500);
+  res.json({ message: error.message || "An unknown error occurred!" });
+});
 app.use(notFound);
 app.use(errorHandler);
 

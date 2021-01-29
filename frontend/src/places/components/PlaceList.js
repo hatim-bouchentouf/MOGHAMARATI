@@ -10,7 +10,7 @@ import "./PlaceList.css";
 const PlaceList = (props) => {
   const auth = useContext(AuthContext);
   const userId = useParams().userId;
-  console.log(userId);
+
   if (props.items?.length === 0) {
     return (
       <div className="noplace-list">

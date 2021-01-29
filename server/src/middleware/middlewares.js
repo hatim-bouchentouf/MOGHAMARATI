@@ -1,5 +1,11 @@
 //to show error of routes instead of cannot get/ ...
 const notFound = (req, res, next) => {
+  if (req.file) {
+    fs.unlink(req.file.path, (err) => {
+      console.log(err);
+      console.log("hello");
+    });
+  }
   const error = new Error(`Not Found - ${req.originalUrl}`);
   res.status(404);
   //next middleware
