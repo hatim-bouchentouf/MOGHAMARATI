@@ -3,7 +3,7 @@ import ReactMapGL, { Marker } from "react-map-gl";
 
 const Map = (props) => {
   const [viewport, setViewport] = useState({
-    width: "50vw",
+    width: "100%",
     height: "50vh",
     latitude: 34.01,
     longitude: -6.83,
@@ -38,7 +38,6 @@ const Map = (props) => {
             <circle cx="12" cy="10" r="3"></circle>
           </svg>
         </Marker>
-        )
       </ReactMapGL>
     </div>
   );

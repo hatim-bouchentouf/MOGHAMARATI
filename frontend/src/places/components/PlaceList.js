@@ -13,9 +13,9 @@ const PlaceList = (props) => {
 
   if (props.items?.length === 0) {
     return (
-      <div className="noplace-list">
+      <div className="place-list center">
         <Card>
-          <h2>this User have no places !!!</h2>
+          <h2>This User have no place !!!</h2>
           {auth.userId === userId && (
             <Link to="/places">
               <button>Add Place</button>

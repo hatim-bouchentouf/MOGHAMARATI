@@ -12,7 +12,7 @@ function Users() {
     const fetchUsers = async () => {
       try {
         const responseData = await sendRequest(
-          "http://localhost:5000/api/users"
+          process.env.REACT_APP_PUBLIC_URL + "/api/users"
         );
         setLoadedUsers(responseData.users);
       } catch (err) {}

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext } from "react";
 import { useHistory } from "react-router-dom";
 import Input from "../../shared/components/FormElements/Input";
 import ErrorModal from "../../shared/components/UIElements/ErrorModal";
@@ -20,7 +20,10 @@ const NewPlace = () => {
 
   const [formState, inputHandler] = useForm(
     {
-      title: { value: "", isValid: false },
+      title: {
+        value: "",
+        isValid: false,
+      },
       description: {
         value: "",
         isValid: false,
@@ -78,6 +81,11 @@ const NewPlace = () => {
           errorText="Please enter a valid description (at least 5 characters)."
           onInput={inputHandler}
         />
+        <ImageUpload
+          id="image"
+          onInput={inputHandler}
+          errorText="Please provide an image!"
+        />
         <Input
           id="address"
           element="input"
@@ -86,11 +94,7 @@ const NewPlace = () => {
           errorText="Please enter a valid Address."
           onInput={inputHandler}
         />
-        <ImageUpload
-          id="image"
-          onInput={inputHandler}
-          errorText="Please provide an image!"
-        />
+
         <button type="submit" disabled={!formState.isValid}>
           Add Place
         </button>

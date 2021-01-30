@@ -4,7 +4,7 @@ import Modal from "../../shared/components/UIElements/Modal";
 import Card from "../../shared/components/UIElements/Card";
 import "./PlaceItem.css";
 import Map from "../../shared/components/UIElements/Map";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { AuthContext } from "../../shared/context/auth-context";
 import useHttpClient from "../../shared/hooks/http-hook";
 import ErrorModal from "../../shared/components/UIElements/ErrorModal";
@@ -24,13 +24,17 @@ const PlaceItem = (props) => {
     setShowConfirmModal(false);
     try {
       await sendRequest(
-        `http://localhost:5000/api/places/${props.id}`,
+        `${process.env.REACT_APP_PUBLIC_URL}/api/places/${props.id}`,
         "DELETE",
         null,
         { Authorization: "Bearer " + auth.token }
       );
       props.onDelete(props.id);
     } catch (err) {}
+  };
+  const history = useHistory();
+  const EditPlaceButtonHandler = () => {
+    history.push(`/places/${props.id}`);
   };
 
   return (
@@ -67,7 +71,7 @@ const PlaceItem = (props) => {
           {isLoading && <LoadingSpinner asOverlay />}
           <div className="place-item__image">
             <img
-              src={`http://localhost:5000/${props.image}`}
+              src={`${process.env.REACT_APP_PUBLIC_URL}/${props.image}`}
               alt={props.title}
             />
           </div>
@@ -79,9 +83,7 @@ const PlaceItem = (props) => {
           <div className="place-item__actions">
             <button onClick={openMapHandler}>VIEW ON MAP</button>
             {auth.userId === props.creatorId && (
-              <Link to={`/places/${props.id}`}>
-                <button>EDIT</button>
-              </Link>
+              <button onClick={EditPlaceButtonHandler}>EDIT</button>
             )}
             {auth.userId === props.creatorId && (
               <button onClick={showDeleteWarningHandler}>DELETE</button>

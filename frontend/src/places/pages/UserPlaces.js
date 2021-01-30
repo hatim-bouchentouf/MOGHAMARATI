@@ -13,7 +13,7 @@ const UserPlaces = () => {
   useEffect(() => {
     const fetchPlaces = async () => {
       const responseData = await sendRequest(
-        `http://localhost:5000/api/places/user/${userId}`
+        `${process.env.REACT_APP_PUBLIC_URL}/api/places/user/${userId}`
       );
       setLoadedPlaces(responseData.places);
     };
